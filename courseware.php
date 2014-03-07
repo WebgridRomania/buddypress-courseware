@@ -11,6 +11,9 @@ Tested up to: WordPress 3.5 / BuddyPress 1.6
 Author URI: https://github.com/Courseware/buddypress-courseware/contributors
 */
 
+// Exit if accessed directly
+if ( !defined( 'ABSPATH' ) ) exit;
+
 define( 'BPSP_VERSION', '0.9.6' );
 define( 'BPSP_DEBUG', (bool) WP_DEBUG ); // This will allow you to see post types in wp-admin
 define( 'BPSP_PLUGIN_DIR', dirname( __FILE__ ) );
@@ -93,8 +96,8 @@ add_action( 'bp_init', 'bpsp_init', 6 );
 function bpsp_check() {
     $messages = array();
 
-    if ( defined( 'BP_VERSION' ) ) {
-        foreach( array( 'groups', 'activity', 'xprofile', 'forums', 'messages' ) as $c )
+    if ( function_exists( 'bp_get_version' ) && function_exists( 'bbp_get_version' ) ) {
+        foreach( array( 'groups', 'activity', 'xprofile', 'messages' ) as $c )
             if( !bp_is_active( $c ) )
                 $messages[] = sprintf(
                     __( 'BuddyPress Courseware dependency error: <a href="%1$s">%2$s has to be activated</a>!', 'bpsp' ),
