@@ -115,7 +115,7 @@ class BPSP_Roles {
      *
      * Adds extra field to profile screen
      */
-    function register_profile_fields() {
+    public static function register_profile_fields() {
         //HACK: to allow options
         global $bp;
         (array)$bp->profile->field_types[] = 'option';

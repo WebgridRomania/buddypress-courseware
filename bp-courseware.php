@@ -3,18 +3,18 @@
 Plugin Name: BuddyPress Courseware
 Plugin URI: http://buddypress.coursewa.re/
 Description: A LMS for BuddyPress.
-Author: Stas Sușcov
-Version: 0.9.7
+Author: Stas Sușcov, Mădălin Ignișca
+Version: 0.9.8
 License: GNU/GPL 2
-Requires at least: WordPress 3.2, BuddyPress 1.5
-Tested up to: WordPress 3.5 / BuddyPress 1.6
+Requires at least: WordPress 3.8, BuddyPress 1.9
+Tested up to: WordPress 3.8.1 / BuddyPress 1.9.2
 Author URI: https://github.com/Courseware/buddypress-courseware/contributors
 */
 
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
-define( 'BPSP_VERSION', '0.9.6' );
+define( 'BPSP_VERSION', '0.9.7' );
 define( 'BPSP_DEBUG', (bool) WP_DEBUG ); // This will allow you to see post types in wp-admin
 define( 'BPSP_PLUGIN_DIR', dirname( __FILE__ ) );
 define( 'BPSP_WEB_URI', WP_PLUGIN_URL . '/' . basename( BPSP_PLUGIN_DIR ) );
@@ -45,46 +45,13 @@ function bpsp_textdomain() {
 }
 add_action( 'init', 'bpsp_textdomain' );
 
-/**
- * Register post types and taxonomies
- */
-function bpsp_registration() {
-    BPSP_Courses::register_post_types();
-    BPSP_Lectures::register_post_types();
-    BPSP_Assignments::register_post_types();
-    BPSP_Responses::register_post_types();
-    BPSP_Gradebook::register_post_types();
-    BPSP_Bibliography::register_post_types();
-    BPSP_Schedules::register_post_types();
+/* Only load the component if BuddyPress is loaded and initialized. */
+function bp_example_init() {
+    // Because our loader file uses BP_Component, it requires BP 1.5 or greater.
+    if ( version_compare( BP_VERSION, '1.9', '>=' ) )
+        require_once( BPSP_PLUGIN_DIR . '/bp-courseware-loader.php' );
 }
-add_action( 'init', 'bpsp_registration' );
-
-/**
- * On plugins load
- */
-function bpsp_on_plugins_load() {
-    BPSP_Groups::activate_component();
-}
-add_action( 'plugins_loaded', 'bpsp_on_plugins_load', 5 );
-
-/* Initiate the componenets */
-function bpsp_init() {
-    new BPSP_WordPress();
-    new BPSP_Roles();
-    new BPSP_Groups();
-    new BPSP_Courses();
-    new BPSP_Lectures();
-    new BPSP_Assignments();
-    new BPSP_Responses();
-    new BPSP_Gradebook();
-    new BPSP_Bibliography();
-    new BPSP_Schedules();
-    new BPSP_Dashboards();
-    new BPSP_Static();
-    new BPSP_Activity();
-    new BPSP_Notifications();
-}
-add_action( 'bp_init', 'bpsp_init', 6 );
+add_action( 'bp_include', 'bp_example_init' );
 
 /**
  * bpsp_check()
@@ -96,7 +63,7 @@ add_action( 'bp_init', 'bpsp_init', 6 );
 function bpsp_check() {
     $messages = array();
 
-    if ( function_exists( 'bp_get_version' ) && function_exists( 'bbp_get_version' ) ) {
+    if ( function_exists( 'bp_get_version' ) ) {
         foreach( array( 'groups', 'activity', 'xprofile', 'messages' ) as $c )
             if( !bp_is_active( $c ) )
                 $messages[] = sprintf(
@@ -113,8 +80,8 @@ function bpsp_check() {
 
     if( !empty( $messages ) ) {
         echo '<div id="message" class="error fade">';
-            foreach ( $messages as $m )
-                echo "<p>{$m}</p>";
+        foreach ( $messages as $m )
+            echo "<p>{$m}</p>";
         echo '</div>';
         return false;
     }
@@ -129,4 +96,3 @@ function bpsp_activation() {
     BPSP_Roles::register_profile_fields();
 }
 register_activation_hook( BPSP_PLUGIN_FILE, 'bpsp_activation' );
-?>
