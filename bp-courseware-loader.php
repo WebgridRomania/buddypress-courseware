@@ -1,5 +1,13 @@
 <?php
 
+use BPSP_Courses;
+use BPSP_Lectures;
+use BPSP_Assignments;
+use BPSP_Responses;
+use BPSP_Gradebook;
+use BPSP_Bibliography;
+use BPSP_Schedules;
+
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
@@ -21,25 +29,6 @@ add_action( 'init', 'bpsp_registration' );
 
 /**
  * Loads your component into the $bp global
- *
- * This function loads your component into the $bp global. By hooking to bp_loaded, we ensure that
- * BP_Example_Component is loaded after BuddyPress's core components. This is a good thing because
- * it gives us access to those components' functions and data, should our component interact with
- * them.
- *
- * Keep in mind that, when this function is launched, your component has only started its setup
- * routine. Using print_r( $bp->example ) or var_dump( $bp->example ) at the end of this function
- * will therefore only give you a partial picture of your component. If you need to dump the content
- * of your component for troubleshooting, try doing it at bp_init, ie
- *   function bp_example_var_dump() {
- *   	  global $bp;
- *	  var_dump( $bp->example );
- *   }
- *   add_action( 'bp_init', 'bp_example_var_dump' );
- * It goes without saying that you should not do this on a production site!
- *
- * @package BuddyPress_Skeleton_Component
- * @since 1.6
  */
 function bpsp_courseware_load_core_component() {
     global $bp;

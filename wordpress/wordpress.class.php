@@ -4,11 +4,11 @@
  */
 class BPSP_WordPress {
     /**
-     * __constructor()
+     * __construct()
      *
      * Constructor, loads all the required hooks
      */
-    function __constructor() {
+    function __construct() {
         // Add our screen to BuddyPress menu
         add_action(
             bp_core_admin_hook(),
@@ -48,7 +48,7 @@ class BPSP_WordPress {
             __( 'Courseware', 'bpsp' ),
             'manage_options',
             'bp-courseware',
-            array( &$this, 'screen' ),
+            array( &$this, 'screen' )
         );
     }
 

@@ -4,14 +4,48 @@
  */
 class BPSP_Roles {    
     /**
-     * __constructor()
+     * __construct()
      * 
      * Constructor. Loads all the filters and actions.
      */
-    function __constructor() {
+    function __construct() {
         add_filter( 'bp_xprofile_field_get_children', array( &$this, 'profile_screen_admin' ) );
         add_filter( 'bp_xprofile_field_get_children', array( &$this, 'profile_screen_hide_roles' ) );
         add_action( 'xprofile_profile_field_data_updated', array( &$this, 'profile_screen_new_request' ), 10, 2 );
+    }
+    
+    /**
+     * profile_screen_admin()
+     * 
+     * Filters option for 'Teacher', only admins are allowed to access it.
+     */
+    function profile_screen_admin( $options ) {
+        for( $i = 0; $i < count( $options ); $i++ ) {
+            if( !is_super_admin() &&
+                $options[$i]->name == __( 'Teacher', 'bpsp' ) &&
+                BP_XProfile_ProfileData::get_value_byid($options[$i]->parent_id) != __( 'Teacher', 'bpsp' ) ) 
+                unset( $options[$i] );
+        }
+        return array_merge( $options );
+    }
+    
+    /**
+     * profile_screen_hide_roles()
+     * 
+     * Filters intermediate roles like 'Applied for Teacher'
+     * if a user has teaching role assigned already.
+     */
+    function profile_screen_hide_roles( $options ) {
+        global $bp;
+        $user_field_data = xprofile_get_field_data( __( 'Role', 'bpsp' ), $bp->loggedin_user->id );
+        for( $i = 0; $i < count( $options ); $i++ ) {
+            if( !is_super_admin() &&
+               $user_field_data == __( 'Teacher', 'bpsp' ) &&
+               $options[$i]->name == __( 'Apply for Teacher', 'bpsp' ) ) {
+                unset( $options[$i] );                
+            }
+        }
+        return array_merge( $options );
     }
     
     /**
@@ -77,40 +111,8 @@ class BPSP_Roles {
         return $content;
     }
     
-    /**
-     * profile_screen_hide_roles()
-     * 
-     * Filters intermediate roles like 'Applied for Teacher'
-     * if a user has teaching role assigned already.
-     */
-    function profile_screen_hide_roles( $options ) {
-        global $bp;
-        $user_field_data = xprofile_get_field_data( __( 'Role', 'bpsp' ), $bp->loggedin_user->id );
-        for( $i = 0; $i < count( $options ); $i++ ) {
-            if( !is_super_admin() &&
-                $user_field_data == __( 'Teacher', 'bpsp' ) &&
-                $options[$i]->name == __( 'Apply for Teacher', 'bpsp' ) )
-                unset( $options[$i] );
-        }
-        return array_merge( $options );
-    }
     
-    /**
-     * profile_screen_admin()
-     * 
-     * Filters option for 'Teacher', only admins are allowed to access it.
-     */
-    function profile_screen_admin( $options ) {
-        for( $i = 0; $i < count( $options ); $i++ ) {
-            if( !is_super_admin() &&
-                $options[$i]->name == __( 'Teacher', 'bpsp' ) &&
-                BP_XProfile_ProfileData::get_value_byid($options[$i]->parent_id) != __( 'Teacher', 'bpsp' ) ) 
-                unset( $options[$i] );
-        }
-        return array_merge( $options );
-    }
-    
-    /**
+/**
      * profile_fields_screen()
      *
      * Adds extra field to profile screen
@@ -231,25 +233,30 @@ class BPSP_Roles {
      * @param Int $user_id, the id of the user to check
      * @return Bool, true or false
      */
-    function can_teach( $user_id = null ) {
+    public static function can_teach( $user_id = null ) {
         global $bp;
         
-        if( !$user_id )
+        if( !$user_id ) {
             $user_id = $bp->loggedin_user->id;
+        }
         
         $is_admin = false;
         
-        if( !BPSP_Groups::courseware_status() )
+        if( !BPSP_Groups::courseware_status() ) {
             return false;
+        }
         
-        if( is_super_admin( $user_id ) )
+        if( is_super_admin( $user_id ) ) {
             return true;
+        }
         
-        if( self::is_teacher( $user_id) )
+        if( self::is_teacher( $user_id ) ) {
             $is_admin = true;
+        }
         
-        if( !get_option( 'bpsp_allow_only_admins' ) && !bp_group_is_admin() )
+        if( !get_option( 'bpsp_allow_only_admins' ) && !bp_group_is_admin() ) {
             $is_admin = false;
+        }
             
         return $is_admin;
     }
@@ -278,27 +285,20 @@ class BPSP_Roles {
     /**
      * get_admins()
      *
-     * A wrapper for WordPress 3.1 `get_users()` with backcompat
+     * A wrapper for WordPress 3.1 `get_users()`
      * @return Mixed, an array of objects
      */
     function get_admins() {
         $admins = array();
         
-        if( function_exists( 'get_users' ) ) {
-            $superadmins = get_users( array( 'role' => 'administrator' ) );
-            if( $superadmins )
-                foreach( $superadmins as $su )
-                    $admins[] = $su->ID;
-                
-        } else {
-            //required to search for superadmins
-            require_once ABSPATH . 'wp-admin/includes/user.php';
-            $users_search = new WP_User_Search( null, null, 'administrator' );
-            $admins = $users_search->get_results();
-        }
+        $superadmins = get_users( array( 'role' => 'administrator' ) );
         
+        if( $superadmins ) {
+            foreach( $superadmins as $su ) {
+                $admins[] = $su->ID;
+            }
+        }
+    
         return $admins;
     }
 }
-
-?>

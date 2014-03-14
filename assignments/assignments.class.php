@@ -38,11 +38,11 @@ class BPSP_Assignments {
     var $frmb = null;
     
     /**
-     * BPSP_Assignments()
+     * __construct()
      *
      * Constructor. Loads the hooks and actions.
      */
-    function BPSP_Assignments() {
+    function __construct() {
         // Initialize our form builder
         $this->frmb = new FormBuilder();
         
@@ -57,7 +57,7 @@ class BPSP_Assignments {
      *
      * Static function to register the assignments post types, taxonomies and capabilities.
      */
-    function register_post_types() {
+    public static function register_post_types() {
         $assignment_post_def = array(
             'label'                 => __( 'Assignments', 'bpsp' ),
             'singular_label'        => __( 'Assignment', 'bpsp' ),

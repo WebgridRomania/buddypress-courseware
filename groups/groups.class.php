@@ -52,7 +52,7 @@ class BPSP_Groups {
      * @param Int $group_id, the id of the group, default is null and global $bp will be used
      * @return Bool, true on success, and false on failure.
      */
-    function courseware_status( $group_id = null ) {
+    public static function courseware_status( $group_id = null ) {
         global $bp;
         if( !$group_id && $bp->groups->current_group )
             $group_id = $bp->groups->current_group->id;
@@ -142,7 +142,7 @@ class BPSP_Groups {
      * @param Array $vars of options
      * @return template $content if $vars['echo'] == false
      */
-    function load_template( $vars = '' ) {
+    public static function load_template( $vars = '' ) {
         $content = '';
         if( empty( $vars ) || !isset( $vars['name'] ) )
             $vars = array(

@@ -24,59 +24,22 @@ class BPSP_Courses {
     var $current_course = null;
     
     /**
-     * BPSP_Courses()
+     * Current URI
+     */
+    var $current_uri = null;
+    
+    /**
+     * __construct()
      *
      * Constructor. Loads the hooks and actions.
      */
-    function BPSP_Courses() {
+    function __construct() {
         add_action( 'bp_after_group_header', array( &$this, 'course_group_header' ) );
         add_action( 'courseware_new_teacher_added', array( &$this, 'add_course_caps' ) );
         add_action( 'courseware_new_teacher_removed', array( &$this, 'remove_course_caps' ) );
         add_action( 'courseware_group_screen_handler', array( &$this, 'screen_handler' ) );
         add_action( 'groups_created_group', array( &$this, 'init_course' ) );
         add_filter( 'courseware_group_nav_options', array( &$this, 'add_nav_options' ) );
-   }
-    
-    /**
-     * register_post_types()
-     *
-     * Static function to register the courses post types, taxonomies and capabilities.
-     */
-    function register_post_types() {
-        $course_post_def = array(
-            'label'                 => __( 'Courses', 'bpsp' ),
-            'singular_label'        => __( 'Course', 'bpsp' ),
-            'description'           => __( 'BuddyPress ScholarPress Courseware Courses', 'bpsp' ),
-            'public'                => BPSP_DEBUG,
-            'publicly_queryable'    => false,
-            'exclude_from_search'   => true,
-            'show_ui'               => BPSP_DEBUG,
-            'capability_type'       => 'course',
-            'hierarchical'          => false,
-            'rewrite'               => false,
-            'query_var'             => false,
-            'supports'              => array( 'title', 'editor', 'author', 'custom-fields' )
-        );
-        if( !register_post_type( 'course', $course_post_def ) )
-            wp_die( __( 'BuddyPress Courseware error while registering courses post type.', 'bpsp' ) );
-        
-        $groups_rel_def = array(
-            'public'        => BPSP_DEBUG,
-            'show_ui'       => BPSP_DEBUG,
-            'hierarchical'  => false,
-            'label'         => __( 'Group ID', 'bpsp'),
-            'query_var'     => 'group_id',
-            'rewrite'       => false,
-            'capabilities'  => array(
-                'manage_terms'  => 'manage_group_id',
-                'edit_terms'    => 'manage_group_id',
-                'delete_terms'  => 'manage_group_id',
-                'assign_terms'  => 'edit_courses'
-                )
-        );
-        register_taxonomy( 'group_id', array( 'course' ), $groups_rel_def );
-        if( !get_taxonomy( 'group_id' ) )
-            wp_die( __( 'BuddyPress Courseware error while registering group taxonomy.', 'bpsp' ) );
     }
     
     /**
@@ -85,8 +48,9 @@ class BPSP_Courses {
     function course_group_header() {
         global $bp;
         
-        if( !$this->has_course_caps( $bp->loggedin_user->id ) || !BPSP_Roles::can_teach( $bp->loggedin_user->id ) )
+        if( !$this->has_course_caps( $bp->loggedin_user->id ) || !BPSP_Roles::can_teach( $bp->loggedin_user->id ) ) {
             return;
+        }
         
         $vars['name'] = '_no_course_group_header';
         $vars['echo'] = false;
@@ -104,14 +68,19 @@ class BPSP_Courses {
      */
     function add_course_caps( $user_id ) {
         $user = new WP_User( $user_id );
-        foreach( $this->caps as $c )
-            if ( !$user->has_cap( $c ) )
+        
+        foreach( $this->caps as $c ) {
+            if ( !$user->has_cap( $c ) ) {
                 $user->add_cap( $c );
+            }
+        }
         
         //Treat super admins
-        if( is_super_admin( $user_id ) )
-            if ( !$user->has_cap( 'edit_others_courses' ) )
+        if( is_super_admin( $user_id ) ) {
+            if ( !$user->has_cap( 'edit_others_courses' ) ) {
                 $user->add_cap( 'edit_others_courses' );
+            }
+        }
     }
     
     /**
@@ -123,13 +92,17 @@ class BPSP_Courses {
      */
     function remove_course_caps( $user_id ) {
         //Treat super admins
-        if( is_super_admin( $user_id) )
+        if( is_super_admin( $user_id) ) {
             return;
+        }
         
         $user = new WP_User( $user_id );
-        foreach( $this->caps as $c )
-            if ( $user->has_cap( $c ) )
+        
+        foreach( $this->caps as $c ) {
+            if ( $user->has_cap( $c ) ) {
                 $user->remove_cap( $c );
+            }
+        }
     }
     
     /**
@@ -150,9 +123,11 @@ class BPSP_Courses {
         }
         
         $user = new WP_User( $user_id );
-        foreach( $this->caps as $c )
-            if ( !$user->has_cap( $c ) )
+        foreach( $this->caps as $c ) {
+            if ( !$user->has_cap( $c ) ) {
                 $is_ok = false;
+			}
+		}
         
         if( !get_option( 'bpsp_allow_only_admins' ) )
             if( !bp_group_is_admin() )
@@ -200,14 +175,17 @@ class BPSP_Courses {
         global $bp;
         $courseware_uri = bp_get_group_permalink( $bp->groups->current_group ) . 'courseware/' ;
         
-        if( is_object( $course_identifier ) && $course_identifier->post_type == "course" )
-            if( $course_identifier->group[0]->name == $bp->groups->current_group->id )
+        if( is_object( $course_identifier ) && $course_identifier->post_type == "course" ) {
+            if( $course_identifier->group[0]->name == $bp->groups->current_group->id ) {
                 return $course_identifier;
-            else
+            } else {
                 return null;
+            }
+        }
         
-        if( !$course_identifier && get_class( (object)$this->current_course ) == __CLASS__ )
+        if( !$course_identifier && get_class( (object)$this->current_course ) == __CLASS__ ) {
             return $this->current_course;
+        }
         
         $course_query = array(
             'post_type' => 'course',
@@ -215,18 +193,20 @@ class BPSP_Courses {
         );
         
         if ( $course_identifier != null ) {
-            if( is_numeric( $course_identifier ) )
+            if( is_numeric( $course_identifier ) ) {
                 $course_query['p'] = $course_identifier;
-            else
+            } else {
                 $course_query['name'] = $course_identifier;
+            }
         }
         $course = get_posts( $course_query );
         
         if( !empty( $course[0] ) ) {
             $course[0]->permalink = $courseware_uri . 'course/' . $course[0]->post_name;
             return $course[0];
-        } else
+        } else {
             return null;
+        }
     }
     
     /**
@@ -241,20 +221,24 @@ class BPSP_Courses {
         $course_ids = null;
         $courses = array();
         
-        if( empty( $group_id ) )
+        if( empty( $group_id ) ) {
             $group_id = $bp->groups->current_group->id;
+        }
         
         $term_id = get_term_by( 'slug', $group_id, 'group_id' );
-        if( !empty( $term_id ) )
+        if( !empty( $term_id ) ) {
             $course_ids = get_objects_in_term( $term_id->term_id, 'group_id' );
+        }
         
-        if( !empty( $course_ids ) )
+        if( !empty( $course_ids ) ) {
             arsort( $course_ids ); // Get latest entries first
-        else
+        } else {
             return null;
+        }
         
-        foreach ( $course_ids as $cid )
+        foreach ( $course_ids as $cid ) {
             $courses[] = self::is_course( $cid );
+        }
         
         return array_filter( $courses );
     }
@@ -263,13 +247,15 @@ class BPSP_Courses {
      * add_nav_options( $options )
      *
      * Adds courses specific navigations options
+	 * this is strange...
      *
      * @param Array $options A set of current nav options
      * @return Array containing new nav options
      */
     function add_nav_options( $options ) {
-        global $bp;
+        // global $bp;
         $options[__( 'Course Description', 'bpsp' )] = $options[__( 'Home', 'bpsp' )] . '/course';
+		
         return $options;
     }
     
@@ -294,8 +280,9 @@ class BPSP_Courses {
             $this->current_course = $new_course_id;
             do_action( 'courseware_course_added', $new_course_id );
             bp_core_add_message( __( 'New course was added.', 'bpsp' ) );
-        } else
+        } else {
             bp_core_add_message( __( 'New course could not be added.', 'bpsp' ) );
+		}
     }
     
     /**
@@ -311,13 +298,16 @@ class BPSP_Courses {
         global $bp;
         $course = $this->is_course( $this->current_course );
         
-        if( $this->has_course_caps( $bp->loggedin_user->id ) || is_super_admin() )
+        if( $this->has_course_caps( $bp->loggedin_user->id ) || is_super_admin() ) {
             $vars['show_edit'] = true;
-        else
+		} else {
             $vars['show_edit'] = null;
+		}
         
-        if( !$course )
+        if( !$course ) {
             $vars['die'] = __( 'BuddyPress Courseware Error! Cheatin\' Uh?', 'bpsp' );
+		}
+		
         $vars['name'] = 'single_course';
         $vars['course_permalink'] = $vars['current_uri'] . '/course/';
         $vars['course_edit_uri'] = $vars['current_uri'] . '/course/edit';
@@ -357,13 +347,14 @@ class BPSP_Courses {
         if( isset( $_POST['course'] ) && $_POST['course']['object'] == 'group' && isset( $_POST['_wpnonce'] ) ) {
             $updated_course = $_POST['course'];
             $is_nonce = wp_verify_nonce( $_POST['_wpnonce'], $nonce_name );
-            if( true != $is_nonce )
+			
+            if( true != $is_nonce ) {
                 $vars['message'] = __( 'Nonce Error while editing a course.', 'bpsp' );
-            else 
+			} else {
                 if( isset( $updated_course['title'] ) &&
                     isset( $updated_course['content'] ) &&
                     isset( $updated_course['group_id'] )
-                ) {
+				  ) {
                     $updated_course['title'] = strip_tags( $updated_course['title'] );
                     $updated_course_id =  wp_update_post( array(
                         'ID'            => $old_course->ID,
@@ -371,11 +362,13 @@ class BPSP_Courses {
                         'post_content'  => $updated_course['content'],
                     ));
                     
-                    if( $updated_course_id )
+                    if( $updated_course_id ) {
                         $vars['message'] = __( 'New course was updated.', 'bpsp' );
-                    else
+					} else {
                         $vars['error'] = __( 'New course could not be updated.', 'bpsp' );
+					}
                 }
+			}
         }
         
         $vars['name'] = 'edit_course';
@@ -399,5 +392,48 @@ class BPSP_Courses {
     function load_editor() {
         do_action( 'courseware_editor' );
     }
+    
+    /**
+     * register_post_types()
+     *
+     * Static function to register the courses post types, taxonomies and capabilities.
+     */
+    public static function register_post_types() {
+        $course_post_def = array(
+            'label'                 => __( 'Courses', 'bpsp' ),
+            'singular_label'        => __( 'Course', 'bpsp' ),
+            'description'           => __( 'BuddyPress ScholarPress Courseware Courses', 'bpsp' ),
+            'public'                => BPSP_DEBUG,
+            'publicly_queryable'    => false,
+            'exclude_from_search'   => true,
+            'show_ui'               => BPSP_DEBUG,
+            'capability_type'       => 'course',
+            'hierarchical'          => false,
+            'rewrite'               => false,
+            'query_var'             => false,
+            'supports'              => array( 'title', 'editor', 'author', 'custom-fields' )
+        );
+        if( !register_post_type( 'course', $course_post_def ) ) {
+            wp_die( __( 'BuddyPress Courseware error while registering courses post type.', 'bpsp' ) );
+		}
+        
+        $groups_rel_def = array(
+            'public'        => BPSP_DEBUG,
+            'show_ui'       => BPSP_DEBUG,
+            'hierarchical'  => false,
+            'label'         => __( 'Group ID', 'bpsp'),
+            'query_var'     => 'group_id',
+            'rewrite'       => false,
+            'capabilities'  => array(
+                'manage_terms'  => 'manage_group_id',
+                'edit_terms'    => 'manage_group_id',
+                'delete_terms'  => 'manage_group_id',
+                'assign_terms'  => 'edit_courses'
+                )
+        );
+        register_taxonomy( 'group_id', array( 'course' ), $groups_rel_def );
+        if( !get_taxonomy( 'group_id' ) ) {
+            wp_die( __( 'BuddyPress Courseware error while registering group taxonomy.', 'bpsp' ) );
+		}
+    }
 }
-?>
