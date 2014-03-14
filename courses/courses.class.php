@@ -171,7 +171,7 @@ class BPSP_Courses {
      * @param $course_identifier ID or Name of the course to be checked
      * @return Course object if course exists and null if not.
      */
-    function is_course( $course_identifier = null ) {
+    public static function is_course( $course_identifier = null ) {
         global $bp;
         $courseware_uri = bp_get_group_permalink( $bp->groups->current_group ) . 'courseware/' ;
         
