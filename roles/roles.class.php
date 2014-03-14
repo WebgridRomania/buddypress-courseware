@@ -4,11 +4,11 @@
  */
 class BPSP_Roles {    
     /**
-     * BPSP_Roles()
+     * __constructor()
      * 
      * Constructor. Loads all the filters and actions.
      */
-    function BPSP_Roles() {
+    function __constructor() {
         add_filter( 'bp_xprofile_field_get_children', array( &$this, 'profile_screen_admin' ) );
         add_filter( 'bp_xprofile_field_get_children', array( &$this, 'profile_screen_hide_roles' ) );
         add_action( 'xprofile_profile_field_data_updated', array( &$this, 'profile_screen_new_request' ), 10, 2 );

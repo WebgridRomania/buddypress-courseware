@@ -4,25 +4,25 @@
  */
 class BPSP_WordPress {
     /**
-     * BPSP_WordPress()
+     * __constructor()
      *
      * Constructor, loads all the required hooks
      */
-    function BPSP_WordPress() {
+    function __constructor() {
         // Add our screen to BuddyPress menu
         add_action(
             bp_core_admin_hook(),
-            array( __CLASS__, 'menus')
+            array( &$this, 'menus')
         );
 
         // Ensure compatibility
         add_action('admin_notices', 'bpsp_check' );
         // Help Screen
-        add_action('admin_head', array( __CLASS__, 'screen_help') );
+        add_action('admin_head', array( &$this, 'screen_help') );
         // Support link
-        add_filter( 'plugin_row_meta', array( __CLASS__, 'support_link' ), 10, 2 );
+        add_filter( 'plugin_row_meta', array( &$this, 'support_link' ), 10, 2 );
         // Settings link
-        add_action( 'plugin_action_links_' . BPSP_PLUGIN_FILE, array( __CLASS__, 'action_link' ), 10, 4 );
+        add_action( 'plugin_action_links_' . BPSP_PLUGIN_FILE, array( &$this, 'action_link' ), 10, 4 );
 
         // Initialize our options
         add_option( 'bpsp_allow_only_admins' );
@@ -48,28 +48,8 @@ class BPSP_WordPress {
             __( 'Courseware', 'bpsp' ),
             'manage_options',
             'bp-courseware',
-            array( __CLASS__, "screen")
+            array( &$this, 'screen' ),
         );
-    }
-
-    /**
-     * screen_help()
-     *
-     * Handles the screen() help
-     */
-    function screen_help() {
-        global $current_screen;
-
-        // If it's not Courseware Screen
-        if( !stristr( $current_screen->id, 'courseware' ) )
-            return;
-
-        $content = self::load_template( array( 'name' => 'contextual_help' ) );
-        $current_screen->add_help_tab( array(
-            'id'=> 'default',
-            'title'=> __( 'Help', 'bpsp' ),
-            'content' => $content
-        ) );
     }
 
     /**
@@ -146,7 +126,27 @@ class BPSP_WordPress {
     }
 
     /**
-     * action_link( $links )
+     * screen_help()
+     *
+     * Handles the screen() help
+     */
+    function screen_help() {
+        global $current_screen;
+
+        // If it's not Courseware Screen
+        if( !stristr( $current_screen->id, 'courseware' ) )
+            return;
+
+        $content = self::load_template( array( 'name' => 'contextual_help' ) );
+        $current_screen->add_help_tab( array(
+            'id'=> 'default',
+            'title'=> __( 'Help', 'bpsp' ),
+            'content' => $content
+        ) );
+    }
+
+    /**
+     * suport_link( $links )
      * Adds a new entry link under plugin description
      *
      * @param Mixed $links, initial links
@@ -240,4 +240,3 @@ class BPSP_WordPress {
             return null;
     }
 }
-?>
