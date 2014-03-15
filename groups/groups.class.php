@@ -88,6 +88,8 @@ class BPSP_Groups {
     
     /**
      * screen_handler()
+	 * 
+	 * @todo needs rewritten, it's not compatible with BuddyPress > 1.6
      *
      * Courseware action for handling the screens on group pages
      */
