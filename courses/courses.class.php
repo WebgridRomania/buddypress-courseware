@@ -216,7 +216,7 @@ class BPSP_Courses {
      * @param Int $group_id the ID of the group, default $bp->groups->current_group->id
      * @return null if no groups and Course object if has courses.
      */
-    function has_courses( $group_id = null ) {
+    public static function has_courses( $group_id = null ) {
         global $bp;
         $course_ids = null;
         $courses = array();

@@ -254,7 +254,7 @@ class BPSP_Assignments {
      * @param Int $group_id of the group to be checked
      * @return Mixed Assignment objects if assignments exist and null if not.
      */
-    function has_assignments( $group_id = null ) {
+    public static function has_assignments( $group_id = null ) {
         global $bp;
         $assignment_ids = null;
         $assignments = array();

@@ -226,7 +226,7 @@ class BPSP_Schedules {
      * @param Int $group_id of the group to be checked
      * @return Mixed Schedule objects if schedules exist and null if not.
      */
-    function has_schedules( $group_id = null ) {
+    public static function has_schedules( $group_id = null ) {
         global $bp;
         $schedule_ids = null;
         $schedules = array();

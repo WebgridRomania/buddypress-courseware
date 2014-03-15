@@ -207,7 +207,7 @@ class BPSP_Lectures {
      * @param Int $group_id of the group to be checked
      * @return Mixed Lecture objects if lectures exist and null if not.
      */
-    function has_lectures( $group_id = null ) {
+    public static function has_lectures( $group_id = null ) {
         global $bp;
         $lecture_ids = null;
         $lectures = array();
