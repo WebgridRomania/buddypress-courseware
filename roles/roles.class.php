@@ -20,12 +20,19 @@ class BPSP_Roles {
      * Filters option for 'Teacher', only admins are allowed to access it.
      */
     function profile_screen_admin( $options ) {
+		
         for( $i = 0; $i < count( $options ); $i++ ) {
-            if( !is_super_admin() &&
-                $options[$i]->name == __( 'Teacher', 'bpsp' ) &&
-                BP_XProfile_ProfileData::get_value_byid($options[$i]->parent_id) != __( 'Teacher', 'bpsp' ) ) 
-                unset( $options[$i] );
+			
+            if( 
+					!is_super_admin() &&
+					$options[$i]->name == __( 'Teacher', 'bpsp' ) &&
+					BP_XProfile_ProfileData::get_value_byid($options[$i]->parent_id) != __( 'Teacher', 'bpsp' )
+					) {
+				unset( $options[$i] );
+					}
+					
         }
+		
         return array_merge( $options );
     }
     
@@ -36,15 +43,22 @@ class BPSP_Roles {
      * if a user has teaching role assigned already.
      */
     function profile_screen_hide_roles( $options ) {
-        global $bp;
+		
+        global $bp;		
         $user_field_data = xprofile_get_field_data( __( 'Role', 'bpsp' ), $bp->loggedin_user->id );
+		
         for( $i = 0; $i < count( $options ); $i++ ) {
-            if( !is_super_admin() &&
-               $user_field_data == __( 'Teacher', 'bpsp' ) &&
-               $options[$i]->name == __( 'Apply for Teacher', 'bpsp' ) ) {
-                unset( $options[$i] );                
-            }
+			
+            if( 
+					!is_super_admin() &&
+					$user_field_data == __( 'Teacher', 'bpsp' ) &&
+					$options[$i]->name == __( 'Apply for Teacher', 'bpsp' )
+					) {
+                unset( $options[$i] );				
+					}
+			
         }
+		
         return array_merge( $options );
     }
     
@@ -57,10 +71,11 @@ class BPSP_Roles {
      */
     function profile_screen_new_request( $field_id, $field_value ) {
         global $bp;
+		
         if( $field_value == __( 'Apply for Teacher', 'bpsp' ) ) {
-            $superadmins = self::get_admins();
-            $content = $this->request_message( $bp->loggedin_user->userdata, true );
-            $subject = $this->request_message( $bp->loggedin_user->userdata, false, true );
+			$superadmins = self::get_admins();
+			$content = $this->request_message( $bp->loggedin_user->userdata, true );
+			$subject = $this->request_message( $bp->loggedin_user->userdata, false, true );
             if( !is_super_admin() )
                 messages_new_message(
                     array(
@@ -111,89 +126,6 @@ class BPSP_Roles {
         return $content;
     }
     
-    
-/**
-     * profile_fields_screen()
-     *
-     * Adds extra field to profile screen
-     */
-    public static function register_profile_fields() {
-        //HACK: to allow options
-        global $bp;
-        (array)$bp->profile->field_types[] = 'option';
-        
-        if( BPSP_Roles::field_group_id_from_name( __( 'Courseware', 'bpsp' ) ) )
-            return false;
-        
-        $bpsp_group_id = xprofile_insert_field_group(
-            array(
-                name        => __( 'Courseware', 'bpsp' ),
-                description => __( 'Students and Teachers fields. Do not delete as long as you use BuddyPress ScholarPress Courseware!', 'bpsp' ),
-                can_delete  => false
-            )
-        );
-        if( !$bpsp_group_id )
-            wp_die( __( 'BuddyPress Courseware error when saving xProfile group.', 'bpsp' ) );
-        
-        /* Create the radio buttons */
-        xprofile_insert_field(
-            array (
-                field_group_id  => $bpsp_group_id,
-                name            => __( 'Role', 'bpsp' ),
-                can_delete      => false,
-                description     => __( 'Your role when using Courseware. Every request requires moderation. Please be patient until an administrator reviews it.', 'bpsp' ),
-                is_required     => false,
-                type            => 'radio'
-            )
-        );
-        $bpsp_field_id = xprofile_get_field_id_from_name( __( 'Role', 'bpsp' ) );
-        if( !$bpsp_field_id )
-            wp_die( __( 'BuddyPress Courseware error when saving xProfile field.', 'bpsp' ) );
-            
-        /* Create the radio options */
-        xprofile_insert_field(
-            array (
-                field_group_id  => $bpsp_group_id,
-                parent_id       => $bpsp_field_id,
-                name            => __( 'Teacher', 'bpsp' ),
-                can_delete      => false,
-                is_required     => false,
-                type            => 'option'
-            )
-        );
-        
-        xprofile_insert_field(
-            array (
-                field_group_id      => $bpsp_group_id,
-                parent_id           => $bpsp_field_id,
-                name                => __( 'Student', 'bpsp' ),
-                can_delete          => false,
-                is_required         => false,
-                type                => 'option',
-                is_default_option   => true
-            )
-        );
-        
-        xprofile_insert_field(
-            array (
-                field_group_id  => $bpsp_group_id,
-                parent_id       => $bpsp_field_id,
-                name            => __( 'Apply for Teacher', 'bpsp' ),
-                can_delete      => false,
-                is_required     => false,
-                type            => 'option'
-            )
-        );
-        
-        if( !xprofile_get_field_id_from_name( __( 'Teacher', 'bpsp' ) ) ||
-            !xprofile_get_field_id_from_name( __( 'Student', 'bpsp' ) ) ||
-            !xprofile_get_field_id_from_name( __( 'Apply for Teacher', 'bpsp' ) )
-        )
-            wp_die( __( 'BuddyPress Courseware error when saving xProfile field options.', 'bpsp' ) );
-            
-        return true;
-    }
-    
     /**
      * field_group_id_from_name( $group_name )
      *
@@ -202,7 +134,7 @@ class BPSP_Roles {
      * @param String $group_name the name of the field group to be found.
      * @return Int $group_id the id of the found field group
      */
-    function field_group_id_from_name( $group_name ) {
+    public static function field_group_id_from_name( $group_name ) {
         $group_id = null;
         $groups = BP_XProfile_Group::get();
         foreach( $groups as $g )
@@ -219,7 +151,7 @@ class BPSP_Roles {
      * @param Int $user_id, user ID to check for
      * @return Bool, true if is a teacher and false on failure
      */
-    function is_teacher( $user_id ) {
+    public static function is_teacher( $user_id ) {
         if( __( 'Teacher', 'bpsp') == xprofile_get_field_data( __( 'Role', 'bpsp' ), $user_id ) )
             return true;
         else
@@ -268,7 +200,7 @@ class BPSP_Roles {
      * @param Int $group_id, the group ID to check for
      * @return Mixed, an array of user_id's
      */
-    function get_teachers( $group_id ) {
+    public static function get_teachers( $group_id ) {
         $teachers = array();
         
         $group_admins = groups_get_group_admins( $group_id );
@@ -288,7 +220,7 @@ class BPSP_Roles {
      * A wrapper for WordPress 3.1 `get_users()`
      * @return Mixed, an array of objects
      */
-    function get_admins() {
+    public static function get_admins() {
         $admins = array();
         
         $superadmins = get_users( array( 'role' => 'administrator' ) );
@@ -300,5 +232,100 @@ class BPSP_Roles {
         }
     
         return $admins;
+    }    
+    
+	/**
+     * profile_fields_screen()
+     *
+     * Adds extra field to profile screen
+     */
+    public static function register_profile_fields() {
+        //HACK: to allow options
+        global $bp;
+        (array)$bp->profile->field_types[] = 'option';
+        
+        if( self::field_group_id_from_name( __( 'Courseware', 'bpsp' ) ) ) {
+            return false;
+		}
+        
+        $bpsp_group_id = xprofile_insert_field_group(
+            array(
+                name        => __( 'Courseware', 'bpsp' ),
+                description => __(
+						'Students and Teachers fields. Do not delete as long as you use BuddyPress ScholarPress Courseware!',
+						'bpsp'
+						),
+                can_delete  => false
+            )
+        );
+		
+        if( !$bpsp_group_id ) {
+            wp_die( __( 'BuddyPress Courseware error when saving xProfile group.', 'bpsp' ) );
+		}
+        
+        /* Create the radio buttons */
+        xprofile_insert_field(
+            array (
+                field_group_id  => $bpsp_group_id,
+                name            => __( 'Role', 'bpsp' ),
+                can_delete      => false,
+                description     => __(
+						'Your role when using Courseware. Every request requires moderation. Please be patient until an administrator reviews it.',
+						'bpsp'
+				),
+                is_required     => false,
+                type            => 'radio'
+            )
+        );
+		
+        $bpsp_field_id = xprofile_get_field_id_from_name( __( 'Role', 'bpsp' ) );
+        if( !$bpsp_field_id ) {
+            wp_die( __( 'BuddyPress Courseware error when saving xProfile field.', 'bpsp' ) );
+		}
+            
+        /* Create the radio options */
+        xprofile_insert_field(
+            array (
+                field_group_id  => $bpsp_group_id,
+                parent_id       => $bpsp_field_id,
+                name            => __( 'Teacher', 'bpsp' ),
+                can_delete      => false,
+                is_required     => false,
+                type            => 'option'
+            )
+        );
+        
+        xprofile_insert_field(
+            array (
+                field_group_id      => $bpsp_group_id,
+                parent_id           => $bpsp_field_id,
+                name                => __( 'Student', 'bpsp' ),
+                can_delete          => false,
+                is_required         => false,
+                type                => 'option',
+                is_default_option   => true
+            )
+        );
+        
+        xprofile_insert_field(
+            array (
+                field_group_id  => $bpsp_group_id,
+                parent_id       => $bpsp_field_id,
+                name            => __( 'Apply for Teacher', 'bpsp' ),
+                can_delete      => false,
+                is_required     => false,
+                type            => 'option'
+            )
+        );
+        
+        if(
+				!xprofile_get_field_id_from_name( __( 'Teacher', 'bpsp' ) ) ||
+				!xprofile_get_field_id_from_name( __( 'Student', 'bpsp' ) ) ||
+				!xprofile_get_field_id_from_name( __( 'Apply for Teacher', 'bpsp' ) )
+				) {
+            wp_die( __( 'BuddyPress Courseware error when saving xProfile field options.', 'bpsp' ) );
+				}
+            
+        return true;
     }
 }

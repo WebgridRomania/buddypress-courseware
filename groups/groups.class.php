@@ -34,29 +34,6 @@ class BPSP_Groups {
     }
     
     /**
-     * courseware_status( $group_id = null )
-     *
-     * Checks if courseware is enabled for current group
-     * @param Int $group_id, the id of the group, default is null and global $bp will be used
-     * @return Bool, true on success, and false on failure.
-     */
-    public static function courseware_status( $group_id = null ) {
-        global $bp;
-        if( !$group_id && $bp->groups->current_group ) {
-            $group_id = $bp->groups->current_group->id;
-        }
-        
-        $global_status = get_option( 'bpsp_global_status' );
-        $group_status = groups_get_groupmeta( $group_id, 'courseware' );
-        
-        if( 'true' == $group_status || !empty( $global_status ) ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-    /**
      * set_nav()
      *
      * Sets up the component navigation
@@ -84,6 +61,29 @@ class BPSP_Groups {
         $this->nav_options[__( 'Home', 'bpsp' )] = $group_permalink . $bp->courseware->slug;
         
         do_action( 'courseware_group_set_nav' );
+    }
+    
+    /**
+     * courseware_status( $group_id = null )
+     *
+     * Checks if courseware is enabled for current group
+     * @param Int $group_id, the id of the group, default is null and global $bp will be used
+     * @return Bool, true on success, and false on failure.
+     */
+    public static function courseware_status( $group_id = null ) {
+        global $bp;
+        if( !$group_id && $bp->groups->current_group ) {
+            $group_id = $bp->groups->current_group->id;
+        }
+        
+        $global_status = get_option( 'bpsp_global_status' );
+        $group_status = groups_get_groupmeta( $group_id, 'courseware' );
+        
+        if( 'true' == $group_status || !empty( $global_status ) ) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**

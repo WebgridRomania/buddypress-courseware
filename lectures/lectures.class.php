@@ -651,7 +651,7 @@ class BPSP_Lectures {
         $lecture_post_def = array(
             'label'                 => __( 'Lecture', 'bpsp' ),
             'singular_label'        => __( 'Lecture', 'bpsp' ),
-            'description'           => __( 'BuddyPress ScholarPress Courseware Lectures', 'bpsp' ),
+            'description'           => __( 'BuddyPress Courseware Lectures', 'bpsp' ),
             'public'                => BPSP_DEBUG,
             'publicly_queryable'    => false,
             'exclude_from_search'   => true,
@@ -663,8 +663,9 @@ class BPSP_Lectures {
             'supports'              => array( 'title', 'editor', 'author', 'page-attributes' ),
             'taxonomies'            => array( 'group_id' )
         );
-        if( !register_post_type( 'lecture', $lecture_post_def ) )
+        if( !register_post_type( 'lecture', $lecture_post_def ) ) {
             wp_die( __( 'BuddyPress Courseware error while registering lecture post type.', 'bpsp' ) );
+		}
         
         $course_rel_def = array(
             'public'        => BPSP_DEBUG,
@@ -682,7 +683,8 @@ class BPSP_Lectures {
         );
         register_taxonomy( 'course_id', array( 'lecture' ), $course_rel_def );
         
-        if( !get_taxonomy( 'course_id' ) )
+        if( !get_taxonomy( 'course_id' ) ) {
             wp_die( __( 'BuddyPress Courseware error while registering course taxonomy.', 'bpsp' ) );
+		}
     }
 }
