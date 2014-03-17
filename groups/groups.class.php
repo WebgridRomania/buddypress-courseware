@@ -25,20 +25,71 @@ class BPSP_Groups {
      *
      * Constructor. Loads filters and actions.
      */
-    function __construct() {
-        add_action( 'bp_groups_setup_nav', array( &$this, 'set_nav' ) );
-        add_filter( 'groups_get_groups', array( &$this, 'extend_search' ), 10, 2 );
-        add_action( 'groups_admin_tabs', array( &$this, 'group_admin_tab' ), 10, 2 );
-        add_action( 'wp', array( &$this, 'group_admin_screen' ), 4 );
-        add_filter( 'media_upload_form_url', array( &$this, 'media_library_tab' ) );
+    public function __construct() {
+		$this->setup_variables();
+		$this->setup_actions();
+		$this->setup_filters();
     }
-    
-    /**
+	
+	/**
+	 * Setup the courses group variables
+	 * 
+	 * @since 0.9.7
+	 */
+	private function setup_variables() {
+		
+		// Component name
+		$this->name          = __( 'Course', 'bpsp' );
+		$this->nav_item_name = __( 'Course', 'bpsp' );
+		
+		// Component slugs
+		$this->slug          = 'course';
+		
+		// Course component is visible
+		$this->visibility    = 'public';
+		
+		// Set position
+		$this->create_step_position = 15;
+		$this->nav_item_postion     = 10;
+		
+		// Allow create step and show in nav
+		$this->enable_create_step = true;
+		$this->enable_nav_item    = true;
+		$this->enable_edit_item   = true;
+		
+		// Template to load and action to hook display on to
+		$this->template_file = 'groups/single/plugins';
+		$this->display_hook  = 'bp_template_content';
+	}
+	
+	/**
+	 * Setup the courses group actions
+	 * 
+	 * @since bp-courseware 0.9.7
+	 */
+	private function setup_actions() {
+		add_action( 'bp_groups_setup_nav', array( $this, 'setup_nav' ) ); // no more since BuddyPress 1.7
+		add_action( 'groups_admin_tabs', array( $this, 'group_admin_tab' ), 10, 2 );
+		add_action( 'wp', array( $this, 'group_admin_screen' ), 4 );
+	}
+	
+	/**
+	 * Setup the courses group filters
+	 * 
+	 * @since bp-courseware 0.9.7
+	 */
+	private function setup_filters() {
+		add_filter( 'groups_get_groups', array( $this, 'extended_search'), 10, 2 );
+		add_filter( 'media_upload_form_url', array( $this, 'media_library_tab' ) );
+	}
+
+
+	/**
      * set_nav()
      *
      * Sets up the component navigation
      */
-    function set_nav() {
+    function setup_nav() {
         global $bp;
 
         if( !$bp->groups->current_group || !$this->courseware_status( $bp->groups->current_group->id ) ) {
